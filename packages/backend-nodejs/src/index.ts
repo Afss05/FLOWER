@@ -19,6 +19,7 @@ import userRoutes from "./routes/users.js";
 import subscriptionRoutes from "./routes/subscriptions.js";
 import blogRoutes from "./routes/blogs.js";
 import adminRoutes from "./routes/admin.js";
+import { aiRouter } from "./ai/index.js";
 
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/ai", aiRouter);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingCart, Package, Users, BarChart3,
-  Settings, LogOut, Bell, Search, ChevronLeft, ChevronRight, Menu, X
+  Settings, LogOut, Bell, Search, ChevronLeft, ChevronRight, Menu, X, Activity
 } from 'lucide-react'
 
 const menuItems = [
@@ -12,6 +12,7 @@ const menuItems = [
   { icon: Package, label: 'Products', path: '/products' },
   { icon: Users, label: 'Customers', path: '/customers' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
+  { icon: Activity, label: 'Activity', path: '/activity' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ]
 
@@ -21,6 +22,7 @@ const pageTitles: Record<string, string> = {
   '/products': 'Products',
   '/customers': 'Customers',
   '/analytics': 'Analytics',
+  '/activity': 'User Activity',
   '/settings': 'Settings',
 }
 

@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Search, Clock, User, ArrowRight, Tag, ChevronRight } from 'lucide-react'
-import { Badge } from '@/components/common'
+import { Badge, VoiceSearchButton } from '@/components/common'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import { blogCategories, blogPosts, blogCategoryColors } from '@/data'
+import { useUIStore } from '@/store/uiStore'
 
 export default function BlogsPage() {
   usePageTitle('Blog & Flower Stories')
+  const { language } = useUIStore()
   const [activeCategory, setActiveCategory] = useState('All')
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState(false)
@@ -42,8 +44,16 @@ export default function BlogsPage() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search articles…"
-              className="w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 transition"
+              className="w-full pl-11 pr-12 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500/30 focus:border-rose-400 transition"
             />
+            {/* Tamil voice search */}
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <VoiceSearchButton
+                lang={language === 'ta' ? 'ta-IN' : 'en-US'}
+                onResult={text => setQuery(text)}
+                size="sm"
+              />
+            </div>
           </div>
         </motion.div>
       </section>

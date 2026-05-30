@@ -1,15 +1,25 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { ShoppingCart, User, Search, Menu, X } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
+import { VoiceSearchButton } from '@/components/common'
 
 export default function Header() {
   const { t } = useTranslation()
   const { isSidebarOpen, toggleSidebar, language, setLanguage } = useUIStore()
   const { isAuthenticated, user } = useAuthStore()
   const [searchOpen, setSearchOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const handleVoiceResult = (transcript: string) => {
+    setSearchQuery(transcript)
+    if (!searchOpen) setSearchOpen(true)
+    // Auto-focus input so user can refine if needed
+    setTimeout(() => searchInputRef.current?.focus(), 50)
+  }
 
   return (
     <header className="bg-white shadow-md sticky top-0 z-50">
@@ -84,11 +94,20 @@ export default function Header() {
 
         {/* Search Bar */}
         {searchOpen && (
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex gap-2 items-center">
             <input
+              ref={searchInputRef}
               type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
               placeholder={t('common.search')}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-700"
+            />
+            {/* Tamil / English voice search */}
+            <VoiceSearchButton
+              lang={language === 'ta' ? 'ta-IN' : 'en-US'}
+              onResult={handleVoiceResult}
+              size="md"
             />
             <button className="btn btn-primary">{t('common.search')}</button>
           </div>

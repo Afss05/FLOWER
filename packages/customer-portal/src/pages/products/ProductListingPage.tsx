@@ -2,12 +2,17 @@ import { useTranslation } from 'react-i18next'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import ProductCard from '@/components/product/ProductCard'
 import { useState } from 'react'
+import { Search } from 'lucide-react'
+import { VoiceSearchButton } from '@/components/common'
+import { useUIStore } from '@/store/uiStore'
 
 export default function ProductListingPage() {
   const { t } = useTranslation()
   usePageTitle('Products')
+  const { language } = useUIStore()
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 })
+  const [searchQuery, setSearchQuery] = useState('')
 
   const products = [
     {
@@ -49,10 +54,35 @@ export default function ProductListingPage() {
     },
   ]
 
+  const filteredProducts = products.filter(p =>
+    searchQuery === '' || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">{t('common.products')}</h1>
+        <h1 className="text-3xl font-bold mb-4">{t('common.products')}</h1>
+
+        {/* Voice-enabled search bar */}
+        <div className="relative mb-8 max-w-xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search flowers, garlands, pooja items… / தேடுங்கள்…"
+            className="w-full pl-11 pr-12 py-3 border border-gray-300 rounded-xl bg-white shadow-sm
+                       focus:outline-none focus:ring-2 focus:ring-rose-400/40 focus:border-rose-400 text-sm transition"
+          />
+          {/* Tamil / English voice search */}
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <VoiceSearchButton
+              lang={language === 'ta' ? 'ta-IN' : 'en-US'}
+              onResult={text => setSearchQuery(text)}
+              size="sm"
+            />
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
@@ -130,9 +160,15 @@ export default function ProductListingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
+              {filteredProducts.length > 0 ? (
+                filteredProducts.map((product) => (
+                  <ProductCard key={product.id} {...product} />
+                ))
+              ) : (
+                <p className="col-span-3 text-center text-gray-500 py-12">
+                  No products found for "{searchQuery}". Try a different search.
+                </p>
+              )}
             </div>
           </div>
         </div>

@@ -1,0 +1,61 @@
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+.pytest_cache/
+
+# Laravel specific
+packages/backend/.env
+packages/backend/.env.*.local
+packages/backend/storage/logs/
+packages/backend/storage/framework/
+packages/backend/bootstrap/cache/
+packages/backend/.rnd
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend
+packages/customer-portal/dist/
+packages/customer-portal/.vite/
+packages/admin-dashboard/dist/
+packages/admin-dashboard/.vite/
+
+# E2E tests
+e2e/test-results/
+e2e/playwright-report/
+
+# Misc
+*.tmp
+.cache/

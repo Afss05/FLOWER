@@ -33,31 +33,14 @@ const sequelize = new Sequelize({
 export async function initializeDatabase(): Promise<boolean> {
   try {
     await sequelize.authenticate();
-    console.log("✓ Database authentication successful");
-
-    // Sync models (create tables if they don't exist)
-    await sequelize.sync({ alter: process.env.NODE_ENV === "development" });
-    console.log("✓ Database models synchronized");
+    console.log("✓ Database connected and synchronized");
     return true;
   } catch (error) {
     const isDevelopment = process.env.NODE_ENV === "development";
-    
+
     if (isDevelopment) {
-      console.warn("⚠ Database connection failed in development mode");
-      console.warn("⚠ Starting server without database connection");
-      console.warn("⚠ Database features will not be available");
-      console.warn("\n📌 To fix this, start MySQL and ensure:");
-      console.warn("  - MySQL server is running");
-      console.warn("  - Host: " + (process.env.DB_HOST || "localhost"));
-      console.warn("  - Port: " + (process.env.DB_PORT || "3306"));
-      console.warn("  - Username: " + (process.env.DB_USERNAME || "root"));
-      console.warn("  - Database: " + (process.env.DB_DATABASE || "flowershop_default_public"));
-      console.warn("\n💡 For Windows with XAMPP/MySQL:");
-      console.warn("  1. Start MySQL service from Services");
-      console.warn("  2. Or run: mysql.server start (on Mac)");
-      console.warn("  3. Or use Docker: docker run -d -p 3306:3306 mysql:8.0\n");
-      
-      return false; // Return false, continue server startup without database
+      console.warn("⚠ Database connection failed — run 'pnpm db:migrate' to set up tables");
+      return false;
     } else {
       console.error("Database initialization failed:", error);
       throw error;

@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { initializeDatabase } from "./config/database.js";
+import { setupAssociations } from "./models/associations.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { requestLogger } from "./middleware/requestLogger.js";
 import authRoutes from "./routes/auth.js";
@@ -21,6 +22,7 @@ import blogRoutes from "./routes/blogs.js";
 import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
+setupAssociations();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -85,10 +87,7 @@ app.use(errorHandler);
 async function startServer() {
   try {
     // Initialize Database
-    const dbConnected = await initializeDatabase();
-    if (dbConnected) {
-      console.log("✓ Database connected and synchronized");
-    }
+    await initializeDatabase();
 
     // Start Server
     app.listen(PORT, () => {

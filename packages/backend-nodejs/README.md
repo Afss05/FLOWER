@@ -48,22 +48,24 @@ src/
 cd packages/backend-nodejs
 
 # Install dependencies
-npm install
-# or
 pnpm install
 
 # Copy environment file
 cp .env.example .env
-
-# Configure environment variables
-# Edit .env with your database and API settings
-
-# Run database migrations
-npm run db:migrate
-
-# Seed initial data (optional)
-npm run db:seed
+# Edit .env with your database credentials
 ```
+
+### Database Setup (run once)
+
+```bash
+# Create all tables
+pnpm db:migrate
+
+# Insert sample data (optional)
+pnpm db:seed
+```
+
+> **Note:** These commands only need to be run once (or when the schema changes). The server does **not** auto-migrate on startup.
 
 ## Environment Variables
 
@@ -76,10 +78,10 @@ DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_USERNAME=root
 DB_PASSWORD=
-DB_DATABASE=flowershop_default_public
+DB_DATABASE=flowershop
 
 # JWT
-JWT_SECRET=your-secret-key-change-in-production
+JWT_SECRET=your-secret-key-min-32-chars-change-in-production
 JWT_EXPIRY=7d
 
 # Client Configuration
@@ -103,18 +105,28 @@ SAME_DAY_DELIVERY_DEADLINE=18:00
 ### Development
 
 ```bash
-npm run dev
-
-# Server runs on http://localhost:8000
-# API endpoints available at http://localhost:8000/api/*
+pnpm dev
 ```
+
+Server runs on `http://localhost:8000` — API at `http://localhost:8000/api`
 
 ### Production
 
 ```bash
-npm run build
-npm start
+pnpm build
+pnpm start
 ```
+
+### All Commands
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start dev server (no auto-migration) |
+| `pnpm build` | Compile TypeScript |
+| `pnpm start` | Start compiled server |
+| `pnpm db:migrate` | Create / update database tables |
+| `pnpm db:seed` | Insert sample data |
+| `pnpm db:reset` | Drop and recreate all tables |
 
 ## API Routes
 
@@ -207,24 +219,27 @@ POST   /api/admin/delivery-slots    # Manage slots
 ## Database Models
 
 ### Core Models
-- **User**: User accounts with authentication
-- **Product**: Product catalog with pricing and inventory
-- **Category**: Product categories (hierarchical)
-- **ProductImage**: Product images and media
-- **Cart**: Shopping carts
-- **CartItem**: Cart items with pricing
-- **Order**: Customer orders
-- **OrderItem**: Order line items
-- **Payment**: Payment transactions
-- **Address**: Delivery addresses
+- **User**: Customer and admin accounts with JWT auth
+- **Category**: Hierarchical product categories
+- **Product**: Catalog with pricing, stock, Tamil descriptions
+- **ProductImage**: Product image gallery
+- **Cart / CartItem**: Shopping cart with price snapshots
+- **Order / OrderItem**: Customer orders with status tracking
+- **Payment**: Razorpay payment transactions
+- **Address**: Saved delivery addresses
 
 ### Feature Models
-- **Subscription**: Recurring delivery plans
-- **SubscriptionDelivery**: Scheduled subscription deliveries
-- **Blog**: Blog posts with SEO
-- **Review**: Product reviews and ratings
-- **Coupon**: Discount coupons
-- **DeliverySlot**: Available delivery time slots
+- **Subscription / SubscriptionDelivery**: Recurring flower delivery plans
+- **Blog**: Bilingual (EN/TA) blog posts with SEO fields
+- **Review**: Verified product reviews with ratings
+- **Coupon**: Fixed and percentage discount coupons
+
+### Seed Data
+After running `pnpm db:seed`:
+- Admin: `admin@flowershop.com` / `Admin@12345`
+- Customer: `customer@flowershop.com` / `Customer@12345`
+- 5 categories, 8 South Indian flower/pooja products
+- Coupons: `WELCOME10` (10% off), `PONGAL25` (25% off)
 
 ## Authentication
 
@@ -238,7 +253,7 @@ The API uses JWT (JSON Web Tokens) for authentication:
 ## Multi-Tenancy
 
 All endpoints are scoped to tenants via `CLIENT_ID`:
-- Database schema: `{CLIENT_ID}_public` (e.g., `default_public`, `yw-flowers_public`)
+- `tenantId` is stored on every row (e.g., `default`)
 - All queries automatically filtered by tenant
 - Supports multiple independent flower shop clients
 

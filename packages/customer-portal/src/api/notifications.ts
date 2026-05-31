@@ -13,14 +13,16 @@ export interface Notification {
 
 export interface NotificationListResponse {
   success: boolean
-  data: Notification[]
-  meta: {
-    total: number
-    page: number
-    limit: number
-    pages: number
+  data: {
+    notifications: Notification[]
+    meta: {
+      total: number
+      page: number
+      limit: number
+      pages: number
+    }
+    unreadCount: number
   }
-  unreadCount: number
 }
 
 export interface PollResponse {

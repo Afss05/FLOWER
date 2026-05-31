@@ -5,6 +5,7 @@ import { useState, useRef } from 'react'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
 import { VoiceSearchButton } from '@/components/common'
+import { NotificationBell } from '@/components/common'
 
 export default function Header() {
   const { t } = useTranslation()
@@ -65,6 +66,9 @@ export default function Header() {
             <button onClick={() => setSearchOpen(!searchOpen)} className="text-gray-700 hover:text-red-700">
               <Search size={20} />
             </button>
+
+            {/* Notifications */}
+            <NotificationBell />
 
             {/* Cart */}
             <Link to="/cart" className="relative text-gray-700 hover:text-red-700">

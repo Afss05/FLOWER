@@ -1,78 +1,85 @@
 import React, { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell, X, Check, CheckCheck, Trash2, Package, CreditCard, AlertTriangle, Star, Megaphone } from 'lucide-react'
-import { useNotificationStore } from '@/store/notificationStore'
-import { useAuthStore } from '@/store/authStore'
-import type { Notification } from '@/api/notifications'
+import {
+  Bell, X, Check, CheckCheck, Trash2,
+  ShoppingBag, AlertTriangle, CreditCard, Megaphone,
+} from 'lucide-react'
+import { useAdminNotificationStore } from '@/store/notificationStore'
+import { useAdminAuthStore } from '@/store/authStore'
+import type { AdminNotification } from '@/api/notifications'
 
-// ── Type icon map ────────────────────────────────────────────────────────────
-function NotifIcon({ type }: { type: string }) {
-  const base = 'w-4 h-4'
-  if (type.startsWith('order_'))    return <Package className={base} />
-  if (type.startsWith('payment_'))  return <CreditCard className={base} />
-  if (type === 'low_stock')         return <AlertTriangle className={base} />
-  if (type === 'new_order')         return <Star className={base} />
-  return <Megaphone className={base} />
+// ── Type config — admin-specific labels & colours ────────────────────────────
+interface TypeConfig {
+  icon: React.ReactNode
+  bg: string
+  text: string
+  ring: string
+  label: string
 }
 
-// ── Type color map ────────────────────────────────────────────────────────────
-function typeColors(type: string): { bg: string; text: string; ring: string } {
-  if (type === 'order_delivered')   return { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200' }
-  if (type === 'order_cancelled')   return { bg: 'bg-red-100',     text: 'text-red-600',     ring: 'ring-red-200' }
-  if (type.startsWith('order_'))    return { bg: 'bg-blue-100',    text: 'text-blue-700',    ring: 'ring-blue-200' }
-  if (type === 'payment_success')   return { bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200' }
-  if (type === 'payment_failed')    return { bg: 'bg-red-100',     text: 'text-red-600',     ring: 'ring-red-200' }
-  if (type === 'low_stock')         return { bg: 'bg-amber-100',   text: 'text-amber-700',   ring: 'ring-amber-200' }
-  return { bg: 'bg-primary-100',  text: 'text-primary-700',  ring: 'ring-primary-200' }
+function typeConfig(type: string): TypeConfig {
+  const cls = 'w-4 h-4'
+  if (type === 'new_order')
+    return { icon: <ShoppingBag className={cls} />, bg: 'bg-emerald-100', text: 'text-emerald-700', ring: 'ring-emerald-200', label: 'New Order' }
+  if (type === 'low_stock')
+    return { icon: <AlertTriangle className={cls} />, bg: 'bg-amber-100', text: 'text-amber-700', ring: 'ring-amber-200', label: 'Low Stock' }
+  if (type === 'payment_failed')
+    return { icon: <CreditCard className={cls} />, bg: 'bg-red-100', text: 'text-red-600', ring: 'ring-red-200', label: 'Payment Failed' }
+  return { icon: <Megaphone className={cls} />, bg: 'bg-slate-100', text: 'text-slate-600', ring: 'ring-slate-200', label: 'System' }
 }
 
 // ── Relative time ─────────────────────────────────────────────────────────────
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
-  const min  = Math.floor(diff / 60000)
-  if (min < 1)   return 'Just now'
-  if (min < 60)  return `${min}m ago`
+  const min = Math.floor(diff / 60000)
+  if (min < 1) return 'Just now'
+  if (min < 60) return `${min}m ago`
   const hr = Math.floor(min / 60)
-  if (hr < 24)   return `${hr}h ago`
-  const d = Math.floor(hr / 24)
-  return `${d}d ago`
+  if (hr < 24) return `${hr}h ago`
+  return `${Math.floor(hr / 24)}d ago`
 }
 
 // ── Single notification row ───────────────────────────────────────────────────
-const NotifItem: React.FC<{ notif: Notification }> = ({ notif }) => {
-  const { markRead, remove } = useNotificationStore()
-  const colors = typeColors(notif.type)
+const NotifItem: React.FC<{ notif: AdminNotification }> = ({ notif }) => {
+  const { markRead, remove } = useAdminNotificationStore()
+  const cfg = typeConfig(notif.type)
   const isUnread = !notif.readAt
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, x: 20 }}
+      initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20, height: 0, marginBottom: 0 }}
-      transition={{ duration: 0.2 }}
+      exit={{ opacity: 0, x: -16, height: 0, marginBottom: 0 }}
+      transition={{ duration: 0.18 }}
       className={`group relative flex gap-3 p-3 rounded-xl transition-colors cursor-pointer
-        ${isUnread ? 'bg-accent-50 hover:bg-accent-100' : 'hover:bg-secondary-50'}`}
+        ${isUnread ? 'bg-rose-50 hover:bg-rose-100/70' : 'hover:bg-slate-50'}`}
       onClick={() => isUnread && markRead(notif.id)}
     >
-      {/* Type icon */}
+      {/* Type badge */}
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ring-1
-        ${colors.bg} ${colors.text} ${colors.ring}`}>
-        <NotifIcon type={notif.type} />
+        ${cfg.bg} ${cfg.text} ${cfg.ring}`}>
+        {cfg.icon}
       </div>
 
       {/* Content */}
       <div className="flex-1 min-w-0">
-        <p className={`text-sm leading-snug ${isUnread ? 'font-semibold text-secondary-900' : 'font-medium text-secondary-700'}`}>
+        <div className="flex items-center gap-1.5 mb-0.5">
+          <span className={`text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded
+            ${cfg.bg} ${cfg.text}`}>
+            {cfg.label}
+          </span>
+        </div>
+        <p className={`text-sm leading-snug ${isUnread ? 'font-semibold text-slate-900' : 'font-medium text-slate-600'}`}>
           {notif.title}
         </p>
-        <p className="text-xs text-secondary-500 mt-0.5 line-clamp-2">{notif.body}</p>
-        <p className="text-xs text-secondary-400 mt-1">{relativeTime(notif.createdAt)}</p>
+        <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">{notif.body}</p>
+        <p className="text-xs text-slate-400 mt-1">{relativeTime(notif.createdAt)}</p>
       </div>
 
-      {/* Unread dot */}
+      {/* Unread indicator */}
       {isUnread && (
-        <span className="flex-shrink-0 mt-1 w-2 h-2 rounded-full bg-accent-950" />
+        <span className="flex-shrink-0 mt-1.5 w-2 h-2 rounded-full bg-rose-500" />
       )}
 
       {/* Hover actions */}
@@ -81,7 +88,7 @@ const NotifItem: React.FC<{ notif: Notification }> = ({ notif }) => {
           <motion.button
             whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={(e) => { e.stopPropagation(); markRead(notif.id) }}
-            className="p-1 rounded-md bg-white shadow-sm hover:bg-secondary-100 text-secondary-500"
+            className="p-1 rounded-md bg-white shadow-sm hover:bg-slate-100 text-slate-500"
             title="Mark as read"
           >
             <Check className="w-3.5 h-3.5" />
@@ -90,8 +97,8 @@ const NotifItem: React.FC<{ notif: Notification }> = ({ notif }) => {
         <motion.button
           whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
           onClick={(e) => { e.stopPropagation(); remove(notif.id) }}
-          className="p-1 rounded-md bg-white shadow-sm hover:bg-red-100 text-secondary-500 hover:text-red-500"
-          title="Delete"
+          className="p-1 rounded-md bg-white shadow-sm hover:bg-red-50 text-slate-500 hover:text-red-500"
+          title="Dismiss"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </motion.button>
@@ -100,18 +107,18 @@ const NotifItem: React.FC<{ notif: Notification }> = ({ notif }) => {
   )
 }
 
-// ── Main bell + panel ─────────────────────────────────────────────────────────
-export const NotificationBell: React.FC = () => {
-  const { isAuthenticated } = useAuthStore()
+// ── Main bell ─────────────────────────────────────────────────────────────────
+export const AdminNotificationBell: React.FC = () => {
+  const { isAuthenticated } = useAdminAuthStore()
   const {
     notifications, unreadCount, isOpen, isLoading, hasMore,
     setOpen, loadMore, markAllRead, startPolling, stopPolling,
-  } = useNotificationStore()
+  } = useAdminNotificationStore()
 
-  const panelRef  = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // Start / stop polling when authenticated
+  // Start / stop polling
   useEffect(() => {
     if (isAuthenticated) {
       startPolling()
@@ -138,25 +145,25 @@ export const NotificationBell: React.FC = () => {
     const el = scrollRef.current
     if (!el) return
     const handler = () => {
-      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50) {
+      if (el.scrollTop + el.clientHeight >= el.scrollHeight - 50 && hasMore) {
         loadMore()
       }
     }
     el.addEventListener('scroll', handler)
     return () => el.removeEventListener('scroll', handler)
-  }, [loadMore])
+  }, [loadMore, hasMore])
 
   return (
     <div ref={panelRef} className="relative">
       {/* Bell button */}
       <motion.button
-        whileHover={{ scale: 1.1 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(!isOpen)}
-        className="relative p-2 hover:bg-secondary-100 rounded-lg transition-colors"
+        className="relative p-2 rounded-xl hover:bg-slate-100 transition"
         title="Notifications"
       >
-        <Bell className="w-5 h-5 text-secondary-700" />
+        <Bell className="w-5 h-5 text-slate-600" />
 
         {/* Badge */}
         <AnimatePresence>
@@ -169,7 +176,7 @@ export const NotificationBell: React.FC = () => {
               transition={{ type: 'spring', stiffness: 500, damping: 25 }}
               className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1
                 flex items-center justify-center rounded-full
-                bg-accent-950 text-white text-[10px] font-bold leading-none"
+                bg-rose-500 text-white text-[10px] font-bold leading-none"
             >
               {unreadCount > 99 ? '99+' : unreadCount}
             </motion.span>
@@ -186,15 +193,15 @@ export const NotificationBell: React.FC = () => {
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ type: 'spring', damping: 22, stiffness: 350 }}
             className="absolute right-0 top-12 w-96 bg-white rounded-2xl shadow-2xl
-              ring-1 ring-secondary-100 overflow-hidden z-50"
+              ring-1 ring-slate-200 overflow-hidden z-50"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-secondary-100">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
               <div className="flex items-center gap-2">
-                <Bell className="w-4 h-4 text-secondary-600" />
-                <span className="font-heading font-semibold text-secondary-900">Notifications</span>
+                <Bell className="w-4 h-4 text-slate-500" />
+                <span className="font-semibold text-slate-900 text-sm">Notifications</span>
                 {unreadCount > 0 && (
-                  <span className="px-2 py-0.5 rounded-full bg-accent-50 text-accent-950 text-xs font-semibold">
+                  <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-semibold">
                     {unreadCount} new
                   </span>
                 )}
@@ -204,9 +211,8 @@ export const NotificationBell: React.FC = () => {
                   <motion.button
                     whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                     onClick={markAllRead}
-                    className="flex items-center gap-1 px-2 py-1 text-xs text-secondary-500
-                      hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors"
-                    title="Mark all as read"
+                    className="flex items-center gap-1 px-2 py-1 text-xs text-slate-500
+                      hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
                   >
                     <CheckCheck className="w-3.5 h-3.5" />
                     All read
@@ -215,7 +221,7 @@ export const NotificationBell: React.FC = () => {
                 <motion.button
                   whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                   onClick={() => setOpen(false)}
-                  className="p-1.5 hover:bg-secondary-100 rounded-lg text-secondary-400 transition-colors"
+                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors"
                 >
                   <X className="w-4 h-4" />
                 </motion.button>
@@ -225,7 +231,7 @@ export const NotificationBell: React.FC = () => {
             {/* List */}
             <div
               ref={scrollRef}
-              className="overflow-y-auto max-h-[420px] p-2 space-y-1 custom-scrollbar"
+              className="overflow-y-auto max-h-[420px] p-2 space-y-1"
             >
               <AnimatePresence mode="popLayout">
                 {/* Loading skeleton */}
@@ -239,11 +245,12 @@ export const NotificationBell: React.FC = () => {
                   >
                     {[1, 2, 3].map((i) => (
                       <div key={i} className="flex gap-3 p-3 rounded-xl">
-                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-secondary-100 animate-pulse" />
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-100 animate-pulse" />
                         <div className="flex-1 space-y-2 py-0.5">
-                          <div className="h-3 bg-secondary-100 rounded animate-pulse w-3/4" />
-                          <div className="h-2.5 bg-secondary-100 rounded animate-pulse w-full" />
-                          <div className="h-2 bg-secondary-100 rounded animate-pulse w-1/3" />
+                          <div className="h-2.5 bg-slate-100 rounded animate-pulse w-1/4" />
+                          <div className="h-3 bg-slate-100 rounded animate-pulse w-3/4" />
+                          <div className="h-2.5 bg-slate-100 rounded animate-pulse w-full" />
+                          <div className="h-2 bg-slate-100 rounded animate-pulse w-1/3" />
                         </div>
                       </div>
                     ))}
@@ -258,48 +265,50 @@ export const NotificationBell: React.FC = () => {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-12 gap-3"
                   >
-                    <div className="w-14 h-14 rounded-full bg-secondary-100 flex items-center justify-center">
-                      <Bell className="w-6 h-6 text-secondary-400" />
+                    <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
+                      <Bell className="w-6 h-6 text-slate-400" />
                     </div>
                     <div className="text-center">
-                      <p className="text-sm font-medium text-secondary-600">No notifications yet</p>
-                      <p className="text-xs text-secondary-400 mt-0.5">
-                        Order updates and alerts will appear here
+                      <p className="text-sm font-medium text-slate-600">All caught up</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        New orders and stock alerts appear here
                       </p>
                     </div>
                   </motion.div>
                 )}
 
-                {/* Notification items */}
-                {notifications.map((n) => <NotifItem key={n.id} notif={n} />)}
+                {/* Items */}
+                {notifications.map((n) => (
+                  <NotifItem key={n.id} notif={n} />
+                ))}
               </AnimatePresence>
 
-              {/* Load more spinner (pagination) */}
+              {/* Pagination spinner */}
               {isLoading && notifications.length > 0 && (
                 <div className="flex justify-center py-4">
                   <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-                    className="w-5 h-5 border-2 border-secondary-200 border-t-accent-950 rounded-full"
+                    className="w-5 h-5 border-2 border-slate-200 border-t-rose-500 rounded-full"
                   />
                 </div>
               )}
 
               {!isLoading && !hasMore && notifications.length > 0 && (
-                <p className="text-center text-xs text-secondary-400 py-3">
-                  You're all caught up 🌸
-                </p>
+                <p className="text-center text-xs text-slate-400 py-3">No more notifications</p>
               )}
             </div>
 
-            {/* Footer: live indicator */}
-            <div className="flex items-center gap-1.5 px-4 py-2 border-t border-secondary-100 bg-secondary-50">
+            {/* Footer */}
+            <div className="flex items-center gap-1.5 px-4 py-2 border-t border-slate-100 bg-slate-50">
               <motion.span
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
                 className="w-1.5 h-1.5 rounded-full bg-emerald-500"
               />
-              <span className="text-xs text-secondary-400">Live updates active</span>
+              <span className="text-xs text-slate-400">
+                {isAuthenticated ? 'Live updates active' : 'Log in to receive alerts'}
+              </span>
             </div>
           </motion.div>
         )}

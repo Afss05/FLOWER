@@ -1,10 +1,13 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard, ShoppingCart, Package, Users, BarChart3,
-  Settings, LogOut, Bell, Search, ChevronLeft, ChevronRight, Menu, X, Activity
+  Settings, LogOut, Search, ChevronLeft, ChevronRight, Menu, X, Activity
 } from 'lucide-react'
+import { AdminNotificationBell } from '@/components/NotificationBell'
+import { useAdminAuthStore } from '@/store/authStore'
+import adminApiClient from '@/api/client'
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -31,6 +34,20 @@ export default function AdminLayout() {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const { isAuthenticated, setToken } = useAdminAuthStore()
+
+  // Auto-login as admin so the notification bell can poll.
+  // In a real app this would be a proper login page.
+  useEffect(() => {
+    if (isAuthenticated) return
+    adminApiClient
+      .post('/auth/login', { email: 'admin@flowershop.com', password: 'Admin@12345' })
+      .then((res) => {
+        const token = res.data?.data?.token
+        if (token) setToken(token)
+      })
+      .catch(() => { /* silent — bell shows "Log in to receive alerts" */ })
+  }, [isAuthenticated, setToken])
 
   const sidebarW = collapsed ? 72 : 256
 
@@ -221,10 +238,7 @@ export default function AdminLayout() {
             </div>
 
             {/* Notifications */}
-            <button className="relative p-2 rounded-xl hover:bg-slate-100 transition">
-              <Bell className="w-5 h-5 text-slate-600" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
-            </button>
+            <AdminNotificationBell />
 
             {/* Avatar */}
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-400 to-pink-600 flex items-center justify-center text-white text-sm font-bold shadow cursor-pointer">

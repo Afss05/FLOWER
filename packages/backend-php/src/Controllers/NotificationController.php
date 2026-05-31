@@ -29,14 +29,18 @@ final class NotificationController
         $limit  = min(50, max(1, (int) ($params['limit'] ?? 20)));
 
         $result = $this->notificationService->list($tenantId, $userId, $page, $limit);
-        return Response::paginated(
-            $response,
-            $result['items'],
-            $result['total'],
-            $result['page'],
-            $result['limit'],
-            'Notifications retrieved'
-        );
+
+        // Return shape that matches the frontend NotificationListResponse interface.
+        return Response::success($response, [
+            'notifications' => $result['items'],
+            'meta'          => [
+                'total' => $result['total'],
+                'page'  => $result['page'],
+                'limit' => $result['limit'],
+                'pages' => $result['pages'],
+            ],
+            'unreadCount'   => $result['unreadCount'],
+        ], 'Notifications retrieved');
     }
 
     // ──────────────────────────────────────────────────────────────────────

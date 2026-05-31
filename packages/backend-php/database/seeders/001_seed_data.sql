@@ -5,9 +5,10 @@ USE `flowershop`;
 
 -- ── Admin user (password: Admin@123) ─────────────────────────────────────────
 INSERT IGNORE INTO `users` (tenant_id, name, email, phone, password, role, status) VALUES
-('default', 'Admin User',       'admin@flowershop.com',    '9876543210', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin',    'active'),
-('default', 'Test Customer',    'customer@flowershop.com', '9876543211', '$2y$12$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'customer', 'active');
--- password hash above is bcrypt for "password" — change in production!
+('default', 'Admin User',       'admin@flowershop.com',    '9876543210', '$2y$12$2cpBchQxoBEeMvf6M6DJfOegWForEFqNu2BzhClof4dVKpMPcz3gq', 'admin',    'active'),
+('default', 'Test Customer',    'customer@flowershop.com', '9876543211', '$2y$12$u8jekzZCT/11UWXnaWeDe.uVNfc5OQkh3CiDsVwYf5VW5G/8tXIOy', 'customer', 'active');
+-- admin@flowershop.com    → Admin@12345
+-- customer@flowershop.com → Customer@12345
 
 -- ── Categories ────────────────────────────────────────────────────────────────
 INSERT IGNORE INTO `categories` (tenant_id, name, name_ta, slug, sort_order) VALUES

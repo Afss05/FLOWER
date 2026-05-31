@@ -1,16 +1,15 @@
 import { create } from 'zustand'
 import {
-  type Notification,
-  pollNotifications,
-  markNotificationRead,
-  markAllNotificationsRead,
-  deleteNotification,
-  fetchNotifications,
-} from '@/api/notifications'
+  type AdminNotification,
+  fetchAdminNotifications,
+  pollAdminNotifications,
+  markAdminNotificationRead,
+  markAllAdminNotificationsRead,
+  deleteAdminNotification,
+} from '../api/notifications'
 
-interface NotificationStore {
-  // State
-  notifications: Notification[]
+interface AdminNotificationStore {
+  notifications: AdminNotification[]
   unreadCount: number
   isOpen: boolean
   isLoading: boolean
@@ -29,10 +28,10 @@ interface NotificationStore {
   remove: (id: number) => Promise<void>
   startPolling: () => void
   stopPolling: () => void
-  _onNewNotifications: (incoming: Notification[]) => void
+  _onNewNotifications: (incoming: AdminNotification[]) => void
 }
 
-export const useNotificationStore = create<NotificationStore>((set, get) => ({
+export const useAdminNotificationStore = create<AdminNotificationStore>((set, get) => ({
   notifications: [],
   unreadCount: 0,
   isOpen: false,
@@ -45,7 +44,6 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   setOpen: (open) => {
     set({ isOpen: open })
     if (open) {
-      // Always reset and reload page 1 when panel is opened
       set({ page: 1, hasMore: true, notifications: [] })
       get().loadMore()
     }
@@ -56,7 +54,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     if (isLoading || !hasMore) return
     set({ isLoading: true })
     try {
-      const res = await fetchNotifications(page, 20)
+      const res = await fetchAdminNotifications(page, 20)
       const incoming = res.data?.notifications ?? []
       set((state) => ({
         notifications: page === 1 ? incoming : [...state.notifications, ...incoming],
@@ -71,17 +69,15 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   markRead: async (id) => {
-    // Optimistic
     set((state) => ({
       notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, readAt: new Date().toISOString() } : n
+        n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
       ),
       unreadCount: Math.max(0, state.unreadCount - 1),
     }))
     try {
-      await markNotificationRead(id)
+      await markAdminNotificationRead(id)
     } catch {
-      // revert: refetch
       get().loadMore()
     }
   },
@@ -95,7 +91,7 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       unreadCount: 0,
     }))
     try {
-      await markAllNotificationsRead()
+      await markAllAdminNotificationsRead()
     } catch {
       get().loadMore()
     }
@@ -105,14 +101,14 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
     const removed = get().notifications.find((n) => n.id === id)
     set((state) => ({
       notifications: state.notifications.filter((n) => n.id !== id),
-      unreadCount: removed && !removed.readAt
-        ? Math.max(0, state.unreadCount - 1)
-        : state.unreadCount,
+      unreadCount:
+        removed && !removed.readAt
+          ? Math.max(0, state.unreadCount - 1)
+          : state.unreadCount,
     }))
     try {
-      await deleteNotification(id)
+      await deleteAdminNotification(id)
     } catch {
-      // restore
       if (removed) {
         set((state) => ({ notifications: [removed, ...state.notifications] }))
       }
@@ -133,9 +129,8 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
   },
 
   startPolling: () => {
-    const { _abortController, _pollingSince } = get()
-    if (_abortController) return // already polling
-
+    const { _abortController } = get()
+    if (_abortController) return
     const controller = new AbortController()
     set({ _abortController: controller })
 
@@ -143,23 +138,18 @@ export const useNotificationStore = create<NotificationStore>((set, get) => ({
       while (!controller.signal.aborted) {
         try {
           const since = get()._pollingSince
-          const res = await pollNotifications(since, 20)
+          const res = await pollAdminNotifications(since, 20)
           if (!controller.signal.aborted) {
             get()._onNewNotifications(res.data?.notifications ?? [])
-            if (res.data?.nextSince) {
-              set({ _pollingSince: res.data.nextSince })
-            }
+            if (res.data?.nextSince) set({ _pollingSince: res.data.nextSince })
           }
         } catch {
           if (controller.signal.aborted) break
-          // Back-off on error: wait 5 s before retrying
           await new Promise((r) => setTimeout(r, 5000))
         }
-        // Small gap between re-connects to avoid thundering herd
         await new Promise((r) => setTimeout(r, 300))
       }
     }
-
     loop()
   },
 

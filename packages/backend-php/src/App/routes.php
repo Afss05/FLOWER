@@ -6,6 +6,7 @@ use App\Controllers\AdminController;
 use App\Controllers\AuthController;
 use App\Controllers\BlogController;
 use App\Controllers\CartController;
+use App\Controllers\NotificationController;
 use App\Controllers\OrderController;
 use App\Controllers\ProductController;
 use App\Controllers\SubscriptionController;
@@ -93,4 +94,21 @@ return function (App $app): void {
         $group->put('/products/{id:[0-9]+}',             [ProductController::class, 'update']);
         $group->delete('/products/{id:[0-9]+}',          [ProductController::class, 'destroy']);
     })->add(new RoleMiddleware(['admin', 'super_admin']))->add(AuthMiddleware::class);
+
+    // ── Notifications (auth required) ─────────────────────────────────────────────────────
+    // Polling-based push notifications — no WebSocket required.
+    //
+    // Client usage:
+    //   1. GET /api/notifications/poll?since=<ISO8601>&timeout=20
+    //      → blocks up to 20s, returns new notifications + nextSince
+    //   2. On response (empty or not), immediately re-connect with nextSince
+    //   3. GET /api/notifications/count  → lightweight badge count
+    $app->group('/api/notifications', function (RouteCollectorProxy $group) {
+        $group->get('',                    [NotificationController::class, 'index']);
+        $group->get('/count',              [NotificationController::class, 'count']);
+        $group->get('/poll',               [NotificationController::class, 'poll']);
+        $group->patch('/read-all',         [NotificationController::class, 'markAllRead']);
+        $group->patch('/{id:[0-9]+}/read', [NotificationController::class, 'markRead']);
+        $group->delete('/{id:[0-9]+}',     [NotificationController::class, 'destroy']);
+    })->add(AuthMiddleware::class);
 };

@@ -234,4 +234,20 @@ CREATE TABLE IF NOT EXISTS `coupons` (
   INDEX `idx_tenant` (`tenant_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- ── Notifications ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id`          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `tenant_id`   VARCHAR(50)   NOT NULL DEFAULT 'default',
+  `user_id`     INT UNSIGNED  NOT NULL,
+  `type`        VARCHAR(100)  NOT NULL,
+  `title`       VARCHAR(255)  NOT NULL,
+  `body`        TEXT          NOT NULL,
+  `data`        JSON          DEFAULT NULL,
+  `read_at`     DATETIME      DEFAULT NULL,
+  `created_at`  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX `idx_user_unread` (`tenant_id`, `user_id`, `read_at`),
+  INDEX `idx_created`     (`created_at`),
+  CONSTRAINT `fk_notif_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -21,7 +21,7 @@ export async function addToCart(item: AddToCartRequest) {
 }
 
 export async function updateCartItem(itemId: number, quantity: number) {
-  const response = await apiClient.patch(`/cart/items/${itemId}`, { quantity })
+  const response = await apiClient.put(`/cart/items/${itemId}`, { quantity })
   return response.data
 }
 

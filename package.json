@@ -8,6 +8,7 @@
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r --parallel run build",
     "preview": "pnpm -r --parallel run preview",
+    "backend:start": "cd packages/backend-php && composer run start",
     "test": "pnpm -r --parallel run test",
     "test:run": "pnpm -r --parallel run test:run",
     "test:coverage": "pnpm -r --parallel run test:coverage",

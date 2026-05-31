@@ -1,135 +1,95 @@
 @echo off
-REM FlowerShop Backend Installation Script
-REM This script installs PHP, MySQL, and Composer
+REM FlowerShop Installation Script
+REM Requires: PHP 8.2+, MySQL 8, Composer, Node.js 18+, pnpm
 
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
 
 echo.
 echo ╔════════════════════════════════════════════════════╗
-echo ║    FlowerShop Backend Installation Script         ║
+echo ║       FlowerShop Installation Script              ║
 echo ╚════════════════════════════════════════════════════╝
 echo.
 
-REM Check if already installed
-echo [1/5] Checking existing installations...
+:: ── 1. Check tools ─────────────────────────────────────────────────────────
+echo [1/4] Checking tools...
+
 where php >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✓ PHP already installed
-    php -v
-    set PHP_INSTALLED=1
-)
+if %errorlevel% equ 0 (echo ✓ PHP found) else (echo ✗ PHP not found - install from https://www.php.net & pause & exit /b 1)
 
 where mysql >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✓ MySQL already installed
-    mysql --version
-    set MYSQL_INSTALLED=1
-)
+if %errorlevel% equ 0 (echo ✓ MySQL found) else (echo ✗ MySQL not found - install from https://dev.mysql.com & pause & exit /b 1)
 
 where composer >nul 2>&1
-if %errorlevel% equ 0 (
-    echo ✓ Composer already installed
-    composer --version
-    set COMPOSER_INSTALLED=1
-)
+if %errorlevel% equ 0 (echo ✓ Composer found) else (echo ✗ Composer not found - install from https://getcomposer.org & pause & exit /b 1)
 
-if "%PHP_INSTALLED%"=="1" if "%MYSQL_INSTALLED%"=="1" if "%COMPOSER_INSTALLED%"=="1" (
-    echo.
-    echo ✓ All tools already installed!
-    goto setup_backend
-)
+where node >nul 2>&1
+if %errorlevel% equ 0 (echo ✓ Node.js found) else (echo ✗ Node.js not found - install from https://nodejs.org & pause & exit /b 1)
 
-REM Install with Chocolatey
+where pnpm >nul 2>&1
+if %errorlevel% equ 0 (echo ✓ pnpm found) else (echo Installing pnpm... & npm install -g pnpm)
+
+:: ── 2. PHP backend ──────────────────────────────────────────────────────────
 echo.
-echo [2/5] Installing missing tools with Chocolatey...
-echo Please make sure to run PowerShell as Administrator for this to work!
-echo.
+echo [2/4] Setting up PHP backend...
+cd /d "%~dp0packages\backend-php"
 
-if "%PHP_INSTALLED%"=="" (
-    echo Installing PHP...
-    choco install php -y
-)
-
-if "%MYSQL_INSTALLED%"=="" (
-    echo Installing MySQL...
-    choco install mysql -y
-)
-
-if "%COMPOSER_INSTALLED%"=="" (
-    echo Installing Composer...
-    choco install composer -y
-)
-
-REM Refresh PATH
-set "PATH=%PATH%;C:\php;C:\Program Files\MySQL\MySQL Server 8.0\bin"
-
-:setup_backend
-echo.
-echo [3/5] Setting up backend...
-cd /d "%~dp0packages\backend"
-
-REM Copy .env
 if not exist ".env" (
-    echo Creating .env file...
+    echo   Creating .env from .env.example...
     copy ".env.example" ".env"
+    echo   ⚠  Edit packages\backend-php\.env and set JWT_SECRET to a 32+ char string
 )
 
-REM Install Composer dependencies
-echo Installing Composer dependencies...
-composer install
+echo   Installing Composer dependencies...
+composer install --no-interaction
 
-REM Generate key
-echo Generating Laravel key...
-php artisan key:generate
+echo   Creating MySQL database...
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS flowershop CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>nul
+if %errorlevel% neq 0 (
+    echo   Note: Could not auto-create DB. Run manually:
+    echo     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS flowershop;"
+)
 
-REM Create database
+echo   Running migrations...
+mysql -u root flowershop < database\migrations\001_create_tables.sql 2>nul
+if %errorlevel% neq 0 (
+    echo   Note: Run migrations manually:
+    echo     mysql -u root -p flowershop ^< database\migrations\001_create_tables.sql
+)
+
+:: ── 3. Frontend packages ────────────────────────────────────────────────────
 echo.
-echo [4/5] Creating MySQL database...
-echo Enter your MySQL root password (press Enter if none):
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS flowershop_default_public;"
-mysql -u root -p -e "CREATE USER IF NOT EXISTS 'flowershop'@'localhost' IDENTIFIED BY 'flowershop123';"
-mysql -u root -p -e "GRANT ALL PRIVILEGES ON flowershop_default_public.* TO 'flowershop'@'localhost';"
-mysql -u root -p -e "FLUSH PRIVILEGES;"
+echo [3/4] Installing frontend dependencies...
+cd /d "%~dp0"
+pnpm install
 
-REM Run migrations
-echo Running migrations...
-php artisan migrate --force
-
-REM Seed database
-echo Seeding database...
-php artisan db:seed --force
-
+:: ── 4. Done ─────────────────────────────────────────────────────────────────
 echo.
-echo [5/5] Verification...
-echo.
-php -v
-mysql --version
-composer --version
-
+echo [4/4] Done!
 echo.
 echo ╔════════════════════════════════════════════════════╗
-echo ║         Installation Complete!                    ║
+echo ║            Setup Complete!                         ║
 echo ║                                                    ║
-echo ║  To start the project, open 3 terminals:          ║
+echo ║  Start the project (3 separate terminals):        ║
 echo ║                                                    ║
-echo ║  Terminal 1:                                       ║
-echo ║  cd packages\customer-portal                       ║
-echo ║  pnpm dev                                          ║
+echo ║  Terminal 1 — PHP API:                            ║
+echo ║    cd packages\backend-php                        ║
+echo ║    composer run start                             ║
+echo ║    → http://localhost:8080                        ║
 echo ║                                                    ║
-echo ║  Terminal 2:                                       ║
-echo ║  cd packages\admin-dashboard                       ║
-echo ║  pnpm dev                                          ║
+echo ║  Terminal 2 — Customer Portal:                    ║
+echo ║    cd packages\customer-portal                    ║
+echo ║    pnpm dev                                       ║
+echo ║    → http://localhost:5173                        ║
 echo ║                                                    ║
-echo ║  Terminal 3:                                       ║
-echo ║  cd packages\backend                               ║
-echo ║  php artisan serve --port=8000                     ║
+echo ║  Terminal 3 — Admin Dashboard:                    ║
+echo ║    cd packages\admin-dashboard                    ║
+echo ║    pnpm dev                                       ║
+echo ║    → http://localhost:5174                        ║
 echo ║                                                    ║
-echo ║  Then access:                                      ║
-echo ║  - http://localhost:5173  (Customer Portal)       ║
-echo ║  - http://localhost:5174  (Admin Dashboard)       ║
-echo ║  - http://localhost:8000  (Backend API)           ║
+echo ║  Test credentials:                                ║
+echo ║    customer@flowershop.com / Customer@12345       ║
+echo ║    admin@flowershop.com    / Admin@12345          ║
 echo ╚════════════════════════════════════════════════════╝
 echo.
-
 pause

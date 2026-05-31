@@ -1,0 +1,11 @@
+{
+  "name": "@flowershop/backend-php",
+  "version": "1.0.0",
+  "description": "FlowerShop PHP REST API Backend",
+  "private": true,
+  "scripts": {
+    "dev": "php startup-check.php && php -S localhost:8080 -t public",
+    "start": "php startup-check.php && php -S localhost:8080 -t public",
+    "install:composer": "composer install --no-interaction"
+  }
+}

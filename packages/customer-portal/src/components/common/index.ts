@@ -9,3 +9,4 @@ export { Confetti } from './Confetti';
 export { Modal } from './Modal';
 export { VoiceSearchButton } from './VoiceSearchButton';
 export type { VoiceSearchButtonProps } from './VoiceSearchButton';
+export { NotificationBell } from './NotificationBell';

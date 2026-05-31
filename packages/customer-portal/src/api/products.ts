@@ -20,16 +20,21 @@ export async function getProductById(id: number) {
 }
 
 export async function getCategories() {
-  const response = await apiClient.get('/categories')
+  const response = await apiClient.get('/products/categories')
   return response.data
 }
 
 export async function getFeaturedProducts() {
-  const response = await apiClient.get('/products/featured')
+  const response = await apiClient.get('/products/trending')
+  return response.data
+}
+
+export async function getFestivalSpecials() {
+  const response = await apiClient.get('/products/festival-specials')
   return response.data
 }
 
 export async function searchProducts(query: string) {
-  const response = await apiClient.post('/products/search', { query })
+  const response = await apiClient.get('/products/search', { params: { q: query } })
   return response.data
 }

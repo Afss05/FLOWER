@@ -11,7 +11,7 @@ const apiClient = axios.create({
 
 // Request interceptor for auth token
 apiClient.interceptors.request.use((config) => {
-  const { token } = useAuthStore()
+  const token = useAuthStore.getState().token
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
@@ -23,9 +23,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Handle token refresh or logout
-      const { logout } = useAuthStore()
-      logout()
+      useAuthStore.getState().logout()
       window.location.href = '/login'
     }
     return Promise.reject(error)

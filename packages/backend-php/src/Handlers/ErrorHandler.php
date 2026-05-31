@@ -25,6 +25,9 @@ class ErrorHandler extends SlimErrorHandler
         } elseif ($exception instanceof HttpMethodNotAllowedException) {
             $statusCode = 405;
             $message    = 'Method not allowed';
+        } elseif ($exception instanceof \App\Exceptions\ValidationException) {
+            $statusCode = 422;
+            $message    = 'Validation failed';
         } elseif ($exception instanceof \App\Exceptions\AppException) {
             $statusCode = $exception->getStatusCode();
             $message    = $exception->getMessage();
@@ -36,6 +39,11 @@ class ErrorHandler extends SlimErrorHandler
         $response = $this->responseFactory->createResponse($statusCode);
 
         $payload = ['success' => false, 'message' => $message];
+
+        // Include field-level errors for validation failures
+        if ($exception instanceof \App\Exceptions\ValidationException) {
+            $payload['errors'] = $exception->getErrors();
+        }
 
         if ($this->displayErrorDetails && $statusCode === 500) {
             $payload['debug'] = [

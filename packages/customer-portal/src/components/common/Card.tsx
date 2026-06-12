@@ -9,8 +9,8 @@ interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onAnimat
 }
 
 export const Card: React.FC<CardProps> = ({ interactive = false, children, className = '', ...props }) => {
-  const baseStyles = 'bg-white rounded-2xl p-6 shadow-base transition-all duration-normal ease-out';
-  const hoverStyles = interactive ? 'hover:shadow-lg hover:scale-102 cursor-pointer' : '';
+  const baseStyles = 'bg-surface border border-border rounded-2xl p-6 transition-all duration-normal ease-out';
+  const hoverStyles = interactive ? 'hover:border-border-strong hover:shadow-md cursor-pointer' : '';
 
   return (
     <motion.div

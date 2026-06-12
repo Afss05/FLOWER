@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { I18nextProvider } from 'react-i18next'
+import { useEffect } from 'react'
 import i18n from './utils/i18n'
+import { useUIStore } from './store/uiStore'
 import MainLayout from './layouts/MainLayout'
 import HomePage from './pages/home/HomePage'
 import ProductListingPage from './pages/products/ProductListingPage'
@@ -15,8 +17,20 @@ import NotFoundPage from './pages/not-found/NotFoundPage'
 import SubscriptionPage from './pages/subscription/SubscriptionPage'
 import ContactPage from './pages/contact/ContactPage'
 import BlogsPage from './pages/blog/BlogsPage'
+import FestivalCalendarPage from './pages/festivals/FestivalCalendarPage'
 
 function App() {
+  const { theme } = useUIStore()
+
+  useEffect(() => {
+    const root = document.documentElement
+    if (theme === 'dark') {
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+    }
+  }, [theme])
+
   return (
     <I18nextProvider i18n={i18n}>
       <Router>
@@ -32,6 +46,7 @@ function App() {
             <Route path="/subscribe" element={<SubscriptionPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/blog" element={<BlogsPage />} />
+            <Route path="/festivals" element={<FestivalCalendarPage />} />
           </Route>
           
           <Route path="/login" element={<LoginPage />} />

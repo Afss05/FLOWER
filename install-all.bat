@@ -1,6 +1,6 @@
 @echo off
 REM FlowerShop Installation Script
-REM Requires: PHP 8.2+, MySQL 8, Composer, Node.js 18+, pnpm
+REM Requires: PHP 8.2+, MySQL 8, Composer, Node.js 18+, npm
 
 setlocal enabledelayedexpansion
 cd /d "%~dp0"
@@ -26,8 +26,8 @@ if %errorlevel% equ 0 (echo ✓ Composer found) else (echo ✗ Composer not foun
 where node >nul 2>&1
 if %errorlevel% equ 0 (echo ✓ Node.js found) else (echo ✗ Node.js not found - install from https://nodejs.org & pause & exit /b 1)
 
-where pnpm >nul 2>&1
-if %errorlevel% equ 0 (echo ✓ pnpm found) else (echo Installing pnpm... & npm install -g pnpm)
+where npm >nul 2>&1
+if %errorlevel% equ 0 (echo ✓ npm found) else (echo ✗ npm not found - install Node.js from https://nodejs.org & pause & exit /b 1)
 
 :: ── 2. PHP backend ──────────────────────────────────────────────────────────
 echo.
@@ -61,7 +61,7 @@ if %errorlevel% neq 0 (
 echo.
 echo [3/4] Installing frontend dependencies...
 cd /d "%~dp0"
-pnpm install
+npm install
 
 :: ── 4. Done ─────────────────────────────────────────────────────────────────
 echo.
@@ -79,12 +79,12 @@ echo ║    → http://localhost:8080                        ║
 echo ║                                                    ║
 echo ║  Terminal 2 — Customer Portal:                    ║
 echo ║    cd packages\customer-portal                    ║
-echo ║    pnpm dev                                       ║
+echo ║    npm run dev                                    ║
 echo ║    → http://localhost:5173                        ║
 echo ║                                                    ║
 echo ║  Terminal 3 — Admin Dashboard:                    ║
 echo ║    cd packages\admin-dashboard                    ║
-echo ║    pnpm dev                                       ║
+echo ║    npm run dev                                    ║
 echo ║    → http://localhost:5174                        ║
 echo ║                                                    ║
 echo ║  Test credentials:                                ║

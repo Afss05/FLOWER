@@ -1,10 +1,15 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { CalendarDays, Bell, ChevronRight } from 'lucide-react'
 import { usePageTitle } from '@/hooks/usePageTitle'
 import ProductCard from '@/components/product/ProductCard'
+import { getUpcomingFestivals, daysUntil, isPreOrderOpen } from '@/data/festivals'
 
 export default function HomePage() {
   const { t } = useTranslation()
   usePageTitle('Home')
+
+  const upcomingFestivals = getUpcomingFestivals(60)
 
   // Sample featured products
   const featuredProducts = [
@@ -48,7 +53,7 @@ export default function HomePage() {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-app">
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-red-700 to-red-900 text-white py-16 px-4">
         <div className="max-w-7xl mx-auto">
@@ -70,7 +75,7 @@ export default function HomePage() {
 
       {/* Featured Products */}
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold mb-8">{t('home.featured_products')}</h2>
+        <h2 className="text-3xl font-bold mb-8 text-ink">{t('home.featured_products')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {featuredProducts.map((product) => (
             <ProductCard key={product.id} {...product} />
@@ -79,36 +84,106 @@ export default function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="bg-gray-50 py-16 px-4">
+      <section className="py-16 px-4" style={{ backgroundColor: 'var(--bg-subtle)' }}>
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8">Shop by Category</h2>
+          <h2 className="text-3xl font-bold mb-8 text-ink">Shop by Category</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {['Fresh Flowers', 'Pooja Items', 'Garlands', 'Subscriptions'].map((category) => (
               <a
                 key={category}
                 href="/products"
-                className="p-6 bg-white rounded-lg text-center hover:shadow-lg transition"
+                className="p-6 rounded-xl text-center transition-all hover:-translate-y-0.5 card-token"
               >
-                <h3 className="font-semibold text-gray-800">{category}</h3>
+                <h3 className="font-semibold text-ink">{category}</h3>
               </a>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Festival Calendar Banner */}
+      {upcomingFestivals.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 py-16">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <CalendarDays size={24} className="text-red-700 dark:text-red-400" />
+              <h2 className="text-3xl font-bold text-ink">Upcoming Festivals</h2>
+            </div>
+            <Link
+              to="/festivals"
+              className="flex items-center gap-1 text-brand text-sm font-semibold hover:gap-2 transition-all"
+            >
+              View Full Calendar <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {upcomingFestivals.slice(0, 3).map((festival) => {
+              const days = daysUntil(festival.date)
+              const urgent = days <= festival.orderByDays && days >= 0
+              return (
+                <Link
+                  key={festival.id}
+                  to="/festivals"
+                  className="relative flex items-center gap-4 p-4 rounded-xl transition-all hover:-translate-y-0.5 card-token"
+                  style={urgent ? { borderColor: 'var(--brand)', boxShadow: '0 0 0 1px var(--brand)' } : {}}
+                >
+                  <div
+                    className={`text-2xl w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${festival.color} shadow-md shrink-0`}
+                  >
+                    {festival.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-ink text-sm truncate">{festival.name}</h3>
+                    <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                      {new Date(festival.date).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'long',
+                      })}
+                    </p>
+                    <div className="mt-1">
+                      {days === 0 ? (
+                        <span className="text-xs font-bold" style={{ color: '#10b981' }}>🎉 Today!</span>
+                      ) : urgent ? (
+                        <span className="text-xs font-bold text-brand flex items-center gap-1">
+                          <Bell size={11} /> Order today for timely delivery
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+                          {days} days away
+                        </span>
+                      )}
+                    </div>
+                    {isPreOrderOpen(festival) && (
+                      <span
+                        className="inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{ backgroundColor: 'rgba(245,158,11,.1)', color: '#d97706' }}
+                      >
+                        Pre-order Open
+                      </span>
+                    )}
+                  </div>
+                  <ChevronRight size={14} style={{ color: 'var(--text-muted)' }} className="shrink-0" />
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Subscription Plans */}
       <section className="max-w-7xl mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold mb-8">{t('home.subscriptions')}</h2>
+        <h2 className="text-3xl font-bold mb-8 text-ink">{t('home.subscriptions')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
             { name: 'Daily', price: '₹29', description: 'Fresh flowers daily' },
             { name: 'Weekly', price: '₹99', description: '3 deliveries per week' },
             { name: 'Monthly', price: '₹249', description: 'Unlimited deliveries' },
           ].map((plan) => (
-            <div key={plan.name} className="card p-6 text-center hover:shadow-lg transition">
-              <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-              <p className="text-3xl font-bold text-red-700 mb-2">{plan.price}</p>
-              <p className="text-gray-600 mb-4">{plan.description}</p>
+            <div key={plan.name} className="card-token p-6 text-center">
+              <h3 className="text-xl font-bold mb-2 text-ink">{plan.name}</h3>
+              <p className="text-3xl font-bold text-brand mb-2">{plan.price}</p>
+              <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>{plan.description}</p>
               <button className="btn btn-primary">Subscribe</button>
             </div>
           ))}

@@ -5,49 +5,51 @@ export default {
     './index.html',
     './src/**/*.{js,ts,jsx,tsx}',
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        // Primary Navy
+        // ── Semantic tokens (reference CSS variables) ──────────
+        surface: {
+          DEFAULT: 'var(--surface)',
+          raised: 'var(--surface-raised)',
+          overlay: 'var(--surface-overlay)',
+          sunken: 'var(--surface-sunken)',
+        },
+        app: {
+          DEFAULT: 'var(--bg)',
+          subtle: 'var(--bg-subtle)',
+        },
+        border: {
+          DEFAULT: 'var(--border)',
+          strong: 'var(--border-strong)',
+        },
+        ink: {
+          DEFAULT: 'var(--text-primary)',
+          secondary: 'var(--text-secondary)',
+          muted: 'var(--text-muted)',
+        },
+        brand: {
+          DEFAULT: 'var(--brand)',
+          hover: 'var(--brand-hover)',
+          subtle: 'var(--brand-subtle)',
+          text: 'var(--brand-text)',
+        },
+        // ── Original palette (kept for backward compat) ────────
         primary: {
-          50: '#f8f6ff',
-          100: '#f3edff',
-          200: '#e6d9ff',
-          300: '#d4c1ff',
-          400: '#b8a3ff',
-          500: '#9b85ff',
-          600: '#7e67ff',
-          700: '#6149ff',
-          800: '#4a2dff',
-          900: '#3311ff',
-          950: '#0F172A', // Dark Navy
+          50: '#f8f6ff', 100: '#f3edff', 200: '#e6d9ff', 300: '#d4c1ff',
+          400: '#b8a3ff', 500: '#9b85ff', 600: '#7e67ff', 700: '#6149ff',
+          800: '#4a2dff', 900: '#3311ff', 950: '#0F172A',
         },
-        // Secondary Gray
         secondary: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
+          50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1',
+          400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155',
+          800: '#1e293b', 900: '#0f172a',
         },
-        // Accent Rose
         accent: {
-          50: '#fdf2f8',
-          100: '#fce7f3',
-          200: '#fbcfe8',
-          300: '#f8a3d9',
-          400: '#f472b6',
-          500: '#ec4899',
-          600: '#db2777',
-          700: '#be185d',
-          800: '#9d174d',
-          900: '#831843',
-          950: '#E11D48', // Rose
+          50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f8a3d9',
+          400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d',
+          800: '#9d174d', 900: '#831843', 950: '#E11D48',
         },
         success: '#10B981',
         warning: '#F59E0B',

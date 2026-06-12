@@ -29,19 +29,19 @@ shared/                     # Shared test data
 
 ```bash
 # Install Playwright browsers
-pnpm exec playwright install
+npx playwright install
 
 # Run tests
-pnpm test
+npm test
 
 # Run tests in UI mode
-pnpm test --ui
+npm test -- --ui
 
 # Run specific test file
-pnpm test tests/customer-portal/auth/login.spec.ts
+npm test -- tests/customer-portal/auth/login.spec.ts
 
 # Run tests in headed mode (see browser)
-pnpm test --headed
+npm test -- --headed
 ```
 
 ## Writing Tests
@@ -90,16 +90,16 @@ export const testAccounts = {
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Install browsers
-pnpm exec playwright install
+npx playwright install
 
 # Run tests
-pnpm test
+npm test
 
 # Generate report
-pnpm test --reporter=html
+npm test -- --reporter=html
 ```
 
 ## Configuration
@@ -128,7 +128,7 @@ See `playwright.config.ts` for:
 
 ### Selectors not found
 
-- Use Playwright Inspector: `pnpm exec playwright codegen`
+- Use Playwright Inspector: `npx playwright codegen`
 - Check element exists in DOM
 - Use more stable selectors
 

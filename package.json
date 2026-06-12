@@ -5,16 +5,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "pnpm -r --parallel run dev",
-    "build": "pnpm -r --parallel run build",
-    "preview": "pnpm -r --parallel run preview",
+    "dev": "concurrently -n backend,customer,admin -c yellow,cyan,magenta \"npm run dev -w @flowershop/backend-php\" \"npm run dev -w @flowershop/customer-portal\" \"npm run dev -w @flowershop/admin-dashboard\"",
+    "build": "npm run build --workspaces --if-present",
+    "preview": "npm run preview --workspaces --if-present",
     "backend:start": "cd packages/backend-php && composer run start",
-    "test": "pnpm -r --parallel run test",
-    "test:run": "pnpm -r --parallel run test:run",
-    "test:coverage": "pnpm -r --parallel run test:coverage",
-    "lint": "pnpm -r --parallel run lint",
-    "lint:fix": "pnpm -r --parallel run lint:fix",
-    "type-check": "pnpm -r --parallel run type-check",
+    "test": "npm run test --workspaces --if-present",
+    "test:run": "npm run test:run --workspaces --if-present",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "type-check": "npm run type-check --workspaces --if-present",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\""
   },
   "keywords": [
@@ -28,19 +28,19 @@
   "author": "FlowerShop Team",
   "license": "Proprietary",
   "workspaces": [
-    "packages/*",
-    "docs-site"
+    "packages/*"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "concurrently": "^9.0.1",
     "eslint": "^8.50.0",
     "prettier": "^3.0.0",
     "typescript": "^5.3.0"
   },
-  "packageManager": "pnpm@8.15.0+",
+  "packageManager": "npm@10.9.2",
   "engines": {
     "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "npm": ">=9.0.0"
   }
 }

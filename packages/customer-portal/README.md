@@ -23,16 +23,16 @@ src/
 
 ```bash
 # Install dependencies
-pnpm install
+npm install
 
 # Start dev server
-pnpm dev
+npm run dev
 
 # Run tests
-pnpm test
+npm test
 
 # Build for production
-pnpm build
+npm run build
 ```
 
 ## Key Features
